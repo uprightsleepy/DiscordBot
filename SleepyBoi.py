@@ -1,5 +1,4 @@
 import discord
-from discord.ext import commands
 
 from dotenv import load_dotenv
 
@@ -7,13 +6,7 @@ import requests
 import json
 import random
 
-import os
 from decouple import config
-
-from pymongo import MongoClient
-
-connection = MongoClient('mongodb+srv://henryjp:RdnvF3ZX@discordbot.ozrpg.mongodb.net/test')
-db = connection.mydatabase
 
 load_dotenv()
 
