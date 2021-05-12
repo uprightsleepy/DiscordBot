@@ -1,20 +1,16 @@
 import discord
+from discord.ext import commands
 
-from dotenv import load_dotenv
-
-import requests
-import json
-import random
+intents = discord.Intents.default()
+intents.members = True
 
 from decouple import config
 
-load_dotenv()
+import random
+import json
+import requests
 
-client = discord.Client()
-sad_words = ["sad", "depressed", "unhappy", "kms", "awful", "depressing", "shrek"]
-starter_encouragements = ["Cheer up!",
-                          "You're a great person / bot!",
-                          "Hang in there!", "lol u loser"]
+client = commands.Bot(command_prefix='!', intents=intents)
 
 
 def get_quote():
@@ -24,44 +20,61 @@ def get_quote():
     return quote
 
 
-# prints a message when the bot joins the server successfully
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print("{0.user} is now ready for use!".format(client))
+    print("------------------------------------")
 
 
-# responds to messages in chat that begin with !
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
+@client.command()
+async def hello(ctx):
+    await ctx.send("Hello I am SleepyBoi!")
 
-    msg = message.content
 
-    if msg.startswith('!hello'):
-        await message.channel.send('Hello there!')
+@client.command()
+async def hlep(ctx):
+    await ctx.send("Here is a list of my commands!\n1. !hello - Sends a greeting from me to you!\n2. "
+                   "!coin - I'll flip a coin for you!\n"
+                   "3. !inspire - I'll give you a randomly generated inspirational quote.\n"
+                   "4. This was displayed with the !hlep command!")
 
-    if msg.startswith('!coinflip'):
-        flip = random.randint(0, 1)
-        if flip == 0:
-            await message.channel.send("It's heads!")
-        else:
-            await message.channel.send("It's tails!")
 
-    if msg.startswith('hello there'):
-        await message.channel.send('GENERAL KENOBI')
+@client.command()
+async def coin(ctx):
+    flip = random.randint(0, 1)
+    if flip == 0:
+        await ctx.send("It's heads!")
+    else:
+        await ctx.send("It's tails!")
 
-    if msg.startswith('!inspire'):
-        quote = get_quote()
-        await message.channel.send(quote)
 
-    if msg.startswith('!help'):
-        await message.channel.send("Here is a list of my commands!\n1. !hello - Sends a greeting from me to you!\n2. "
-                                   "!coinflip - I'll flip a coin for you!\n"
-                                   "3. !inspire - I'll give you a randomly generated inspirational quote.")
+@client.command()
+async def inspire(ctx):
+    quote = get_quote()
+    await ctx.send(quote)
 
-    if any(word in msg for word in sad_words):
-        await message.channel.send(random.choice(starter_encouragements))
+
+@client.command(pass_context=True)
+async def join(ctx):
+    await ctx.send("Joining voice channel...")
+    if ctx.author.voice:
+        channel = ctx.message.author.voice.channel
+        await channel.connect()
+        await ctx.send("Joined!")
+
+    else:
+        await ctx.send("You must be in a voice channel to use this command!")
+
+
+@client.command(pass_context=True)
+async def leave(ctx):
+    await ctx.send("Leaving voice channel...")
+    if ctx.voice_client:
+        await ctx.guild.voice_client.disconnect()
+        await ctx.send("I left the voice channel.")
+
+    else:
+        await ctx.send("I am not in a voice channel.")
 
 
 # activates the bot
